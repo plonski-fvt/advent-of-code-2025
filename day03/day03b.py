@@ -15,7 +15,6 @@ def find_highest_number(digits: list[int], number_power: int):
     candidate_number = best_digit * 10 ** number_power + find_highest_number(digits[best_index+1:], number_power - 1)
     return candidate_number
         
-
 with open("input.txt") as f:
     lines = f.readlines()
     for l in lines:
