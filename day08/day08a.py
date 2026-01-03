@@ -1,4 +1,4 @@
-from scipy.spatial import KDTree
+import math
 
 coords: list[tuple[int, int, int]] = []
 
@@ -9,28 +9,23 @@ with open("input.txt") as f:
             (int(coords_strings[0]), int(coords_strings[1]), int(coords_strings[2]))
         )
 
-box_tree = KDTree(coords)
+distances_i_j: list[tuple[float, int, int]] = []
 
-shortest_distances = []
-has_edge: set[tuple[int, int]] = set()
+for i in range(len(coords)):
+    for j in range(i + 1, len(coords)):
+        distance = math.sqrt(
+            (coords[i][0] - coords[j][0]) ** 2 +
+            (coords[i][1] - coords[j][1]) ** 2 +
+            (coords[i][2] - coords[j][2]) ** 2
+        )
+        distances_i_j.append((distance, i, j))
 
-# TODO: this doesn't work because what if e.g. the first 10 closest overall distances involve the same box???
-
-for i, coord in enumerate(coords):
-    d, j = box_tree.query(coord, 2)
-    if (i, j[1]) in has_edge or (j[1], i) in has_edge:
-        continue
-    shortest_distances.append(
-        (d[1], i, j[1])
-    )
-    has_edge.add((i, j[1]))
-
-shortest_distances.sort()
+distances_i_j.sort()
 
 circuit_indices = list(range(len(coords))) # start out with n circuits
 
 for i in range(1000):
-    distance, a, b = shortest_distances[i]
+    distance, a, b = distances_i_j[i]
     a_circuit = circuit_indices[a]
     b_circuit = circuit_indices[b]
     circuit_indices = [a_circuit if x == b_circuit else x for x in circuit_indices]
@@ -40,9 +35,9 @@ count_circuit_index: list[tuple[int, int]] = []
 
 for i in range(len(coords)):
     count = sum(i == x for x in circuit_indices)
-    count_circuit_index.append(count, i)
+    count_circuit_index.append((count, i))
 
-count_circuit_index.sort()
+count_circuit_index.sort(reverse=True)
 
 print(count_circuit_index)
 
